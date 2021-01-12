@@ -1,11 +1,27 @@
 import random
 global grid
-
+global oldgrid
 import sys
 
 sys.setrecursionlimit(10**6)
 
 
+def new_value(tab):
+    try:
+        user_input = input("Que voulez vous changer ? xy:valeur    : \n")
+        user_input = user_input.split(":")
+        temp = str(user_input[0])
+        coo_x = temp[0]
+        coo_y = temp[1]
+        value = int(user_input[1])
+        if value <= 0 or value > 9:
+            print("Veuillez entrer des valeurs de 1 à 9 inclus")
+            new_value(tab)
+        tab[int(coo_y)][int(coo_x)] = value
+    except:
+        print("Erreur la donnée entrée n'a pas pu être enregistrée")
+        new_value(tab)
+    return tab
 
 def show_grid(grid_9x9):
     k = 0
@@ -66,7 +82,7 @@ def split(grid):
     return final_grid
 
 
-def estpossible(grid,y,x,n):
+def estpossible(y,x,n):
     temp = []
     l = 0
     # On vérifie les rows
@@ -85,49 +101,34 @@ def estpossible(grid,y,x,n):
 
 
 def resoudre():
-    if not 0 in flatten(grid):
-        show_tab(grid)
-        return True
-    r = list(range(1,10))
-    random.shuffle(r)
-    for y in range(0,9):
-        for x in range(0,9):
-            if not 0 in flatten(grid):
-                show_tab(grid)
-                return True
-            if grid[y][x] == 0:
-                for n in r:
-                    if estpossible(grid,y,x,n):
-                        grid[y][x] = n
-                        resoudre()
-    return False
+    global grid
+    while n_zero() != 0:
+        grid = oldgrid.copy()
+        r = list(range(1,10))
+        random.shuffle(r)
+        for y in range(9):
+            for x in range(9):
+                if grid[y][x] == 0:
+                    for n in r:
+                        if estpossible(y,x,n):
+                            grid[y][x] = n
+                            resoudre()
+                    resoudre()
+        print(n_zero())
+
+
+    return grid
+
+def n_zero():
+    compteur = 0
+    for i in flatten(grid):
+        if i == 0:
+            compteur += 1
+    return compteur
 
 
 
 
-
-
-def new_value(tab):
-    try:
-        user_input = input("Que voulez vous changer ? xy:valeur    : \n")
-        user_input = user_input.split(":")
-        temp = str(user_input[0])
-        coo_x = temp[0]
-        coo_y = temp[1]
-        value = int(user_input[1])
-        if value <= 0 or value > 9:
-            print("Veuillez entrer des valeurs de 1 à 9 inclus")
-            new_value(tab)
-        tab[int(coo_y)][int(coo_x)] = value
-    except:
-        print("Erreur la donnée entrée n'a pas pu être enregistrée")
-        new_value(tab)
-    return tab
-
-
-
-
-
-grid = import_game()
-while not resoudre():
-    resoudre()
+oldgrid = import_game()
+grid = oldgrid.copy()
+show_grid(resoudre())
