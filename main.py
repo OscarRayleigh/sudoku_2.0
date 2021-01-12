@@ -102,18 +102,19 @@ def estpossible(y,x,n):
 
 def resoudre():
     global grid
-    while n_zero() != 0:
+
+
+    r = list(range(1,10))
+    random.shuffle(r)
+    for y in range(9):
+        for x in range(9):
+            if grid[y][x] == 0:
+                for n in r:
+                    if estpossible(y,x,n):
+                        grid[y][x] = n
+                        resoudre()
+
         grid = oldgrid.copy()
-        r = list(range(1,10))
-        random.shuffle(r)
-        for y in range(9):
-            for x in range(9):
-                if grid[y][x] == 0:
-                    for n in r:
-                        if estpossible(y,x,n):
-                            grid[y][x] = n
-                            resoudre()
-                    resoudre()
         print(n_zero())
 
 
