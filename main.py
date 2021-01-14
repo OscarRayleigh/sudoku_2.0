@@ -1,12 +1,11 @@
 import random
 global grid
-global oldgrid
-import sys
 
-sys.setrecursionlimit(10**6)
+global original_grid
 
 
-def new_value(tab):
+
+def new_value(grid):
     try:
         user_input = input("Que voulez vous changer ? xy:valeur    : \n")
         user_input = user_input.split(":")
@@ -16,12 +15,12 @@ def new_value(tab):
         value = int(user_input[1])
         if value <= 0 or value > 9:
             print("Veuillez entrer des valeurs de 1 à 9 inclus")
-            new_value(tab)
-        tab[int(coo_y)][int(coo_x)] = value
+            new_value(grid)
+        grid[int(coo_y)][int(coo_x)] = value
     except:
         print("Erreur la donnée entrée n'a pas pu être enregistrée")
-        new_value(tab)
-    return tab
+        new_value(grid)
+    return grid
 
 def show_grid(grid_9x9):
     k = 0
@@ -83,42 +82,39 @@ def split(grid):
 
 
 def estpossible(y,x,n):
-    temp = []
-    l = 0
-    # On vérifie les rows
-    for i in grid[y]:
-        if i == n:
+    global grid
+    for i in range(0,9):
+        if grid[y][i] == n:
             return False
-    # On vérifie les colonnes
-    for j in range(0,9):
-        temp.append(grid[l][x])
-        l+=1
+    for i in range(0,9):
+        if grid[i][x] == n:
+            return False
 
-    for p in temp:
-        if n == p:
-            return False
+
     return True
 
 
 def resoudre():
+
     global grid
 
-
-    r = list(range(1,10))
-    random.shuffle(r)
     for y in range(9):
         for x in range(9):
             if grid[y][x] == 0:
-                for n in r:
+                for n in range(1,10):
                     if estpossible(y,x,n):
                         grid[y][x] = n
+                        show_grid(grid)
                         resoudre()
-
-        grid = oldgrid.copy()
-        print(n_zero())
+# Dans le cas où je suis dans une impasse, grid[y][x] == 0 mais aucune valeur en n ne permet de valider la case
+    incr_last_possible_value(y,x)
+    show_grid(grid)
 
 
     return grid
+
+
+
 
 def n_zero():
     compteur = 0
@@ -127,9 +123,85 @@ def n_zero():
             compteur += 1
     return compteur
 
+def donttouchthose():
+    coo = []
+    for y in range(0,9):
+        for x in range(0,9):
+            if original_grid[y][x] != 0:
+                coo.append(str(y)+str(x))
+    return coo
+
+def incr_last_possible_value(y,x):
+    list = donttouchthose()
+
+    if x != 0:
+        x -= 1
+    elif x == 0 :
+        if y == 0:
+            print("Nous sommes en 0 0")
+        else:
+            y -= 1
+            x = 8
+
+    if (str(y) + str(x)) in list:
+        incr_last_possible_value(y,x)
+    n = grid[y][x]
+    for i in range(1, 8):
+
+        if n < 9:
+            n += 1
+            if estpossible(y,x, n):
+                grid[y][x] = n
+
+                resoudre()
+
+        if n >= 9:
+            incr_last_possible_value(y,x)
+    print(y,x)
+
+    incr_last_possible_value(y,x)
 
 
 
-oldgrid = import_game()
-grid = oldgrid.copy()
-show_grid(resoudre())
+original_grid = [[0,0,3,0,2,0,6,0,0],
+                 [9,0,0,3,0,5,0,0,1],
+                 [0,0,1,8,0,6,4,0,0],
+                 [0,0,8,1,0,2,9,0,0],
+                 [7,0,0,0,0,0,0,0,8],
+                 [0,0,6,7,0,8,2,0,0],
+                 [0,0,2,6,0,9,5,0,0],
+                 [8,0,0,2,0,3,0,0,9],
+                 [0,0,5,0,1,0,3,0,0]]
+
+
+grid =          [[0,0,3,0,2,1,6,0,0],
+                 [9,0,0,3,0,5,0,0,1],
+                 [0,0,1,8,0,6,4,0,0],
+                 [0,0,8,1,0,2,9,0,0],
+                 [7,0,0,0,0,0,0,0,8],
+                 [0,0,6,7,0,8,2,0,0],
+                 [0,0,2,6,0,9,5,0,0],
+                 [8,0,0,2,0,3,0,0,9],
+                 [0,0,5,0,1,0,3,0,0]]
+
+resoudre()
+show_grid(grid)
+
+    # if y - 1 == -1:
+    #     for i in donttouchthose():
+    #             if y == 0:
+    #                 if (str(y) + str(x-1)) in donttouchthose():
+    #                     print(str(y) + str(x-1))
+    #             if (str(y-1) + str(8)) == i:
+    #                 print(str(y-1) + str(8))
+    #                 if grid[y][x-1] > 9:
+    #                     grid[y][x-1] = grid[y][x-1] + 1
+    #                 elif grid[y][x-1] == 9:
+    #                     incr_last_possible_value(y,x)
+    # elif y - 1 != -1:
+    #     for i in donttouchthose():
+    #             if (str(y) + str(x-1)) == i:
+    #                 if grid[y][x] > 9:
+    #                     grid[y][x] = grid[y][x] + 1
+    #                 elif grid[y][x] == 9:
+    #                     incr_last_possible_value(y,x)
